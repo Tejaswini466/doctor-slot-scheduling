@@ -24,7 +24,7 @@ def create_availability(
 ):
     availability = Availability(**availability_data.model_dump())
     db.add(availability)
-    db.commit()
+    db.flush() #if slot generation fails, nothing is saved
     db.refresh(availability)
 
     generated_slots = generate_slots(

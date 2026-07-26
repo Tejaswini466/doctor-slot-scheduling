@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.schemas.booking import BookingCreate, BookingResponse
-from app.services.booking_service import book_slot
+from app.services.booking_service import book_slot, cancel_booking
 
 router = APIRouter(
     prefix="/booking",
@@ -18,3 +18,13 @@ def create_booking(
     db: Session = Depends(get_db),
 ):
     return book_slot(db, booking)
+
+@router.patch(
+    "/{booking_id}/cancel",
+    response_model=BookingResponse,
+)
+def cancel_booking_endpoint(
+    booking_id: int,
+    db: Session = Depends(get_db),
+):
+    return cancel_booking(db, booking_id)

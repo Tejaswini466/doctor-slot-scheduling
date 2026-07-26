@@ -35,3 +35,30 @@ def book_slot(
     db.commit()
     db.refresh(booking)
     return booking
+
+
+def cancel_booking(
+    db: Session,
+    booking_id: int,
+):
+    booking = (
+        db.query(Booking)
+        .filter(Booking.id == booking_id)
+        .first()
+    )
+    if booking is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Booking not found."
+        )
+    if booking.status == "cancelled":
+        raise HTTPException(
+            status_code=400,
+            detail="Booking is already cancelled."
+        )
+    slot = booking.slot
+    booking.status = "cancelled"
+    slot.status = "available"
+    db.commit()
+    db.refresh(booking)
+    return booking
