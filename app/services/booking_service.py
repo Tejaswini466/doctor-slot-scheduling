@@ -20,7 +20,6 @@ def book_slot(
             status_code=404,
             detail="Slot not found."
         )
-
     if slot.status != "available":
         raise HTTPException(
             status_code=400,
@@ -35,7 +34,6 @@ def book_slot(
     db.commit()
     db.refresh(booking)
     return booking
-
 
 def cancel_booking(
     db: Session,
@@ -53,8 +51,8 @@ def cancel_booking(
         )
     if booking.status == "cancelled":
         raise HTTPException(
-            status_code=400,
-            detail="Booking is already cancelled."
+            status_code=409,
+            detail="Slot is already booked."
         )
     slot = booking.slot
     booking.status = "cancelled"
