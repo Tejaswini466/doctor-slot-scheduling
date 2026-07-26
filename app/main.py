@@ -7,6 +7,7 @@ from app.api.availability import router as availability_router
 from app.models.doctor import Doctor
 from app.db.database import SessionLocal
 from app.api.slot import router as slot_router
+from app.api.booking import router as booking_router
 
 Base.metadata.create_all(bind=engine)
 def seed_doctor():
@@ -24,6 +25,7 @@ app = FastAPI(
 )
 app.include_router(availability_router)
 app.include_router(slot_router)
+app.include_router(booking_router)
 
 @app.get("/")
 def home():
