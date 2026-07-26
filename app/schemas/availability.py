@@ -19,3 +19,9 @@ class AvailabilityResponse(BaseModel):
     model_config = {
         "from_attributes": True
     }
+
+class AvailabilityUpdate(BaseModel):
+    start_time: datetime
+    end_time: datetime
+    consultation_duration: int = Field(gt=0)
+    buffer_minutes: int = Field(default=0, ge=0)
