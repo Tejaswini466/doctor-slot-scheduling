@@ -1,12 +1,30 @@
-def get_available_slot(client):
-    response = client.get("/slots/")
+import pytest
+
+def create_test_slot(client):
+    response = client.post(
+        "/availability/",
+        json={
+            "doctor_id": 1,
+            "start_time": "2026-09-01T09:00:00Z",
+            "end_time": "2026-09-01T10:00:00Z",
+            "consultation_duration": 15,
+            "buffer_minutes": 0,
+        },
+    )
     assert response.status_code == 200
-    slots = response.json()
-    assert len(slots) > 0
-    return slots[0]["id"]
+    availability_id = response.json()["id"]
+    slots = client.get("/slots/").json()
+    new_slots = [
+        slot for slot in slots
+        if slot["availability_id"] == availability_id
+    ]
+    assert len(new_slots) > 0
+    new_slots.sort(key=lambda x: x["id"], reverse=True)
+    return new_slots[0]["id"]
 
 def test_book_slot(client):
-    slot_id = get_available_slot(client)
+    slot_id = create_test_slot(client)
+
     response = client.post(
         "/booking/",
         json={
@@ -21,7 +39,7 @@ def test_book_slot(client):
     assert data["status"] == "confirmed"
 
 def test_double_booking(client):
-    slot_id = get_available_slot(client)
+    slot_id = create_test_slot(client)
     first = client.post(
         "/booking/",
         json={
@@ -30,7 +48,6 @@ def test_double_booking(client):
         },
     )
     assert first.status_code == 200
-
     second = client.post(
         "/booking/",
         json={
@@ -42,7 +59,7 @@ def test_double_booking(client):
     assert second.json()["detail"] == "Slot is already booked."
 
 def test_cancel_booking(client):
-    slot_id = get_available_slot(client)
+    slot_id = create_test_slot(client)
     booking = client.post(
         "/booking/",
         json={
@@ -52,8 +69,6 @@ def test_cancel_booking(client):
     )
     assert booking.status_code == 200
     booking_id = booking.json()["id"]
-    cancel = client.patch(
-        f"/booking/{booking_id}/cancel"
-    )
+    cancel = client.patch(f"/booking/{booking_id}/cancel")
     assert cancel.status_code == 200
     assert cancel.json()["status"] == "cancelled"
