@@ -8,7 +8,6 @@ A backend system for managing doctor availability, automatically generating appo
 
 * Create doctor availability windows.
 * Automatically generate appointment slots based on:
-
   * Consultation duration
   * Buffer time between appointments
 * View all available appointment slots.
@@ -32,7 +31,6 @@ A backend system for managing doctor availability, automatically generating appo
 | Validation        | Pydantic          |
 | API Documentation | Swagger (OpenAPI) |
 | Testing           | Pytest            |
-| Version Control   | Git & GitHub      |
 
 ---
 
@@ -46,6 +44,9 @@ doctor-slot-scheduling/
 │   │   ├── availability.py
 │   │   ├── booking.py
 │   │   └── slot.py
+│   │
+│   ├── core/
+│   │   └── config.py
 │   │
 │   ├── db/
 │   │   └── database.py
@@ -66,13 +67,12 @@ doctor-slot-scheduling/
 │   │   ├── booking_service.py
 │   │   └── slot_service.py
 │   │
-│   └── main.py
+│   └── tests/
+│       ├── conftest.py
+│       ├── test_availability.py
+│       └── test_booking.py
 │
-├── tests/
-│   ├── conftest.py
-│   ├── test_availability.py
-│   └── test_booking.py
-│
+├── main.py
 ├── requirements.txt
 ├── README.md
 └── .gitignore
@@ -109,7 +109,6 @@ doctor-slot-scheduling/
 | id    | Integer |
 | name  | String  |
 
----
 
 ## Availability
 
@@ -122,7 +121,6 @@ doctor-slot-scheduling/
 | consultation_duration | Integer     |
 | buffer_minutes        | Integer     |
 
----
 
 ## Slot
 
@@ -135,7 +133,6 @@ doctor-slot-scheduling/
 | end_time        | Timestamp          |
 | status          | available / booked |
 
----
 
 ## Booking
 
@@ -147,7 +144,6 @@ doctor-slot-scheduling/
 | booked_at    | Timestamp             |
 | status       | confirmed / cancelled |
 
----
 
 # API Endpoints
 
@@ -161,7 +157,6 @@ doctor-slot-scheduling/
 
 Creates a doctor's availability and automatically generates appointment slots.
 
----
 
 ## Update Availability
 
@@ -175,7 +170,6 @@ Updates availability only if none of its generated slots have already been booke
 
 Returns **409 Conflict** if booked slots exist.
 
----
 
 ## Get Available Slots
 
@@ -187,7 +181,6 @@ Returns **409 Conflict** if booked slots exist.
 
 Returns only slots whose status is **available**.
 
----
 
 ## Book Appointment
 
@@ -201,7 +194,6 @@ Books an available appointment slot.
 
 Returns **409 Conflict** if the slot has already been booked.
 
----
 
 ## Cancel Booking
 
@@ -213,7 +205,6 @@ Returns **409 Conflict** if the slot has already been booked.
 
 Cancels a booking and marks the associated slot as available again.
 
----
 
 # Design Decisions
 
@@ -228,7 +219,6 @@ Business logic is separated from API routes.
 
 This separation improves readability and maintainability.
 
----
 
 ## Automatic Slot Generation
 
@@ -240,7 +230,6 @@ When availability is created:
 
 This removes manual slot creation and keeps scheduling consistent.
 
----
 
 ## Transaction Management
 
@@ -269,7 +258,6 @@ The slot row is locked before checking its status.
 
 If another transaction is already booking the same slot, PostgreSQL prevents simultaneous modifications.
 
----
 
 ### 2. Business Validation
 
@@ -281,7 +269,6 @@ Slot status == "available"
 
 If not, the request returns a conflict response.
 
----
 
 ### 3. Database Constraint
 
@@ -376,27 +363,12 @@ Due to assignment scope and timeline:
 
 ---
 
-# Future Improvements
-
-* JWT-based authentication
-* Role-based access control
-* Redis reservation/hold mechanism
-* Dedicated test database
-* Docker containerization
-* CI/CD pipeline using GitHub Actions
-* Load testing using Locust
-* Doctor and Patient CRUD APIs
-* Pagination and filtering for slot listings
-* Appointment reminders and notifications
-
----
-
 # Setup Instructions
 
 ## Clone Repository
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/Tejaswini466/doctor-slot-scheduling
 cd doctor-slot-scheduling
 ```
 
